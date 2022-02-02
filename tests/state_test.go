@@ -196,7 +196,7 @@ func runBenchmark(b *testing.B, t *StateTest) {
 			_, statedb := MakePreState(rawdb.NewMemoryDatabase(), t.json.Pre, false)
 
 			var baseFee *big.Int
-			if config.IsLondon(new(big.Int)) {
+			if config.IsLondon(new(big.Int)) && !config.IsZkEvm(new(big.Int)) {
 				baseFee = t.json.Env.BaseFee
 				if baseFee == nil {
 					// Retesteth uses `0x10` for genesis baseFee. Therefore, it defaults to
