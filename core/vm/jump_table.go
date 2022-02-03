@@ -55,6 +55,7 @@ var (
 	berlinInstructionSet           = newBerlinInstructionSet()
 	londonInstructionSet           = newLondonInstructionSet()
 	mergeInstructionSet            = newMergeInstructionSet()
+	zkEvmInstructionSet            = newZkEvmInstructionSet()
 )
 
 // JumpTable contains the EVM opcodes supported at a given fork.
@@ -76,6 +77,13 @@ func validate(jt JumpTable) JumpTable {
 		}
 	}
 	return jt
+}
+
+// like london but without EIP-3198
+func newZkEvmInstructionSet() JumpTable {
+	instructionSet := newBerlinInstructionSet()
+	enable3529(&instructionSet) // EIP-3529: Reduction in refunds https://eips.ethereum.org/EIPS/eip-3529
+	return validate(instructionSet)
 }
 
 func newMergeInstructionSet() JumpTable {
