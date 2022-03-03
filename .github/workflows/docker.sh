@@ -2,7 +2,7 @@
 
 set -ex
 
-image='ghcr.io/pinkiebell/go-ethereum'
+image="ghcr.io/$GITHUB_REPOSITORY"
 tag=$(git tag --points-at HEAD)
 
 if [ -z "$tag" ]; then
