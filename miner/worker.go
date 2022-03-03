@@ -1222,3 +1222,55 @@ func totalFees(block *types.Block, receipts []*types.Receipt) *big.Float {
 	}
 	return new(big.Float).Quo(new(big.Float).SetInt(feesWei), new(big.Float).SetInt(big.NewInt(params.Ether)))
 }
+
+// sealBlockWith mines and seals a block without changing the canonical chain
+// If `txs` is not nil then produces a block with only those transactions. If nil, then it consumes from the transaction pool.
+func (w *worker) sealBlockWith(parent common.Hash, random common.Hash, timestamp uint64, txs []*types.Transaction) (*types.Block, error) {
+	params := &generateParams{
+		timestamp:  timestamp,
+		forceTime:  true,
+		parentHash: parent,
+		coinbase:   w.coinbase,
+		random:     random,
+		noUncle:    true,
+		noExtra:    false,
+	}
+
+	env, err := w.prepareWork(params)
+	if err != nil {
+		return nil, err
+	}
+	defer env.discard()
+
+	if txs == nil {
+		w.fillTransactions(nil, env)
+	} else {
+		gasLimit := env.header.GasLimit
+		env.gasPool = new(core.GasPool).AddGas(gasLimit)
+		for _, tx := range txs {
+			env.state.Prepare(tx.Hash(), env.tcount)
+			if _, err := w.commitTransaction(env, tx); err != nil {
+				return nil, err
+			}
+			env.tcount++
+		}
+	}
+
+	block, err := w.engine.FinalizeAndAssemble(w.chain, env.header, env.state, env.txs, env.unclelist(), env.receipts)
+	if err != nil {
+		return nil, err
+	}
+
+	results := make(chan *types.Block, 1)
+	if err := w.engine.Seal(w.chain, block, results, nil); err != nil {
+		return nil, err
+	}
+	block = <-results
+
+	// Use InsertBlock... here to verify the block again to avoid inserting a sealed but invalid block
+	if err := w.chain.InsertBlockWithoutSetHead(block); err != nil {
+		return nil, err
+	}
+
+	return block, nil
+}

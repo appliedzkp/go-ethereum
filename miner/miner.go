@@ -246,3 +246,14 @@ func (miner *Miner) GetSealingBlock(parent common.Hash, timestamp uint64, coinba
 func (miner *Miner) SubscribePendingLogs(ch chan<- []*types.Log) event.Subscription {
 	return miner.worker.pendingLogsFeed.Subscribe(ch)
 }
+
+// SealBlock mines and seals a block without changing the canonical chain.
+// If `txs` is not nil then produces a block with only those transactions. If nil, then it consumes from the transaction pool.
+func (miner *Miner) SealBlockWith(parent common.Hash, random common.Hash, timestamp uint64, txs []*types.Transaction) (*types.Block, error) {
+	return miner.worker.sealBlockWith(parent, random, timestamp, txs)
+}
+
+// AnnounceBlock broadcasts the block and emits a chain insertion event
+func (miner *Miner) AnnounceBlock(block *types.Block) error {
+	return miner.worker.mux.Post(core.NewMinedBlockEvent{Block: block})
+}
