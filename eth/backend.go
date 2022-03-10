@@ -468,6 +468,10 @@ func (s *Ethereum) InitMiner() (eb common.Address, err error) {
 	}
 
 	s.miner.SetEtherbase(eb)
+	// If mining is initialized, we can disable the transaction rejection mechanism
+	// introduced to speed sync times.
+	s.SetSynced()
+
 	return eb, nil
 }
 
@@ -492,9 +496,6 @@ func (s *Ethereum) StartMining(threads int) error {
 		if err != nil {
 			return err
 		}
-		// If mining is started, we can disable the transaction rejection mechanism
-		// introduced to speed sync times.
-		atomic.StoreUint32(&s.handler.acceptTxs, 1)
 
 		go s.miner.Start(eb)
 	}
