@@ -79,10 +79,8 @@ func validate(jt JumpTable) JumpTable {
 	return jt
 }
 
-// like london but without EIP-3198
 func newZkEvmInstructionSet() JumpTable {
 	instructionSet := newBerlinInstructionSet()
-	enable3529(&instructionSet) // EIP-3529: Reduction in refunds https://eips.ethereum.org/EIPS/eip-3529
 	return validate(instructionSet)
 }
 
