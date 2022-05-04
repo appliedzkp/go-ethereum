@@ -78,10 +78,6 @@ var (
 	// that is not part of the local blockchain.
 	errUnknownBlock = errors.New("unknown block")
 
-	// errInvalidCheckpointBeneficiary is returned if a checkpoint/epoch transition
-	// block has a beneficiary set to non-zeroes.
-	errInvalidCheckpointBeneficiary = errors.New("beneficiary in checkpoint block non-zero")
-
 	// errInvalidVote is returned if a nonce value is something else that the two
 	// allowed constants of 0x00..0 or 0xff..f.
 	errInvalidVote = errors.New("vote nonce not 0x00..0 or 0xff..f")
@@ -253,15 +249,11 @@ func (c *Clique) verifyHeader(chain consensus.ChainHeaderReader, header *types.H
 	if header.Time > uint64(time.Now().Unix()) {
 		return consensus.ErrFutureBlock
 	}
-	// Checkpoint blocks need to enforce zero beneficiary
-	checkpoint := (number % c.config.Epoch) == 0
-	if checkpoint && header.Coinbase != (common.Address{}) {
-		return errInvalidCheckpointBeneficiary
-	}
 	// Nonces must be 0x00..0 or 0xff..f, zeroes enforced on checkpoints
 	if !bytes.Equal(header.Nonce[:], nonceAuthVote) && !bytes.Equal(header.Nonce[:], nonceDropVote) {
 		return errInvalidVote
 	}
+	checkpoint := (number % c.config.Epoch) == 0
 	if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
 		return errInvalidCheckpointVote
 	}
@@ -498,7 +490,6 @@ func (c *Clique) verifySeal(snap *Snapshot, header *types.Header, parents []*typ
 // header for running the transactions on top.
 func (c *Clique) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
-	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
 
 	number := header.Number.Uint64()
