@@ -458,7 +458,7 @@ func (c *ChainConfig) String() string {
 	}
 
 	if c.ZkEvmBlock != nil {
-		banner += fmt.Sprintf("zkEVM enabled: %-8v\n", c.ZkEvmBlock)
+		banner += fmt.Sprintf("\nzkEVM enabled at block: %-8v\n", c.ZkEvmBlock)
 	}
 
 	return banner
