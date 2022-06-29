@@ -545,11 +545,12 @@ func (c *ChainConfig) IsTerminalPoWBlock(parentTotalDiff *big.Int, totalDiff *bi
 }
 
 // IsZkEvm returns whether num is either equal to or greater for zkevm specific behaviour.
-// zkevm inherits the london rules but selectively disables:
-// 1559 fee market change
-// 2718 Typed Transaction Envelope
-// 2930 Optional access lists
-// 3198 BASEFEE opcode
+// zkevm inherits the `berlin` rules but selectively disables:
+// - EIP-2718: Typed Transaction Envelope
+//   - EIP-2930: Optional access lists
+// In addition, zkevm enables these EIPs included in `london`:
+// - EIP-3541: Reject new contracts starting with the 0xEF byte
+// - EIP-3529: Reduction in refunds
 func (c *ChainConfig) IsZkEvm(num *big.Int) bool {
 	return isForked(c.ZkEvmBlock, num)
 }
