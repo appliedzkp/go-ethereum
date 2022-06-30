@@ -17,7 +17,7 @@ services:
 
   test:
     build:
-      dockerfile: docker/retesteth/Dockerfile
+      dockerfile: docker/retesteth/Dockerfile-light
     command:
       retesteth
       -t GeneralStateTests
