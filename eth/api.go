@@ -135,7 +135,7 @@ func (api *MinerAPI) SetRecommitInterval(interval int) {
 }
 
 // Init initializes the miner without starting mining tasks
-func (api *PrivateMinerAPI) Init() (common.Address, error) {
+func (api *MinerAPI) Init() (common.Address, error) {
 	return api.e.InitMiner()
 }
 
@@ -161,7 +161,7 @@ func decodeTransactions(enc []hexutil.Bytes) ([]*types.Transaction, error) {
 // SealBlock mines and seals a block without changing the canonical chain
 // If `args.Transactions` is not nil then produces a block with only those transactions. If nil, then it consumes from the transaction pool.
 // Returns the block if successful.
-func (api *PrivateMinerAPI) SealBlock(args SealBlockRequest) (map[string]interface{}, error) {
+func (api *MinerAPI) SealBlock(args SealBlockRequest) (map[string]interface{}, error) {
 	var transactions []*types.Transaction
 
 	if args.Transactions != nil {
@@ -182,7 +182,7 @@ func (api *PrivateMinerAPI) SealBlock(args SealBlockRequest) (map[string]interfa
 }
 
 // SetHead updates the canonical chain and announces the block on the p2p layer
-func (api *PrivateMinerAPI) SetHead(hash common.Hash) (bool, error) {
+func (api *MinerAPI) SetHead(hash common.Hash) (bool, error) {
 	block := api.e.BlockChain().GetBlockByHash(hash)
 
 	if block == nil {
